@@ -42,7 +42,6 @@ export default class Ouvrage extends BaseModel {
   @column({ columnName: 'Id_auteur' })
   declare idAuteur: number
 
-  // Relationships
   @belongsTo(() => Utilisateur, { foreignKey: 'idUtilisateur' })
   declare user: BelongsTo<typeof Utilisateur>
 
