@@ -18,7 +18,8 @@ export default class User extends compose(BaseModel, AuthFinder) {
 
   @column()
   declare pseudo: string | null
-
+  @column()
+  declare isAdmin: boolean | false
   @column({ columnName: 'nombre_ouvrages_proposes' })
   declare nombreOuvragesProposes: number
 

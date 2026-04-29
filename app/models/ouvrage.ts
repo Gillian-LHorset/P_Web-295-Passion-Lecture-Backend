@@ -21,14 +21,11 @@ export default class Ouvrage extends BaseModel {
   @column({ columnName: 'note_moyenne' })
   declare noteMoyenne: number
 
-  @column()
-  declare commentaires: string | null
-
   @column({ columnName: 'image_url' })
   declare imageUrl: string | null
 
   @column()
-  declare categorieNom: string // Mapped from 'categorie' column
+  declare categorieNom: string
 
   @column({ columnName: 'nombre_pages' })
   declare nombrePages: number
@@ -53,15 +50,14 @@ export default class Ouvrage extends BaseModel {
   declare user: BelongsTo<typeof Utilisateur>
 
   @belongsTo(() => Categorie, { foreignKey: 'idCategorie' })
-  declare category: BelongsTo<typeof Categorie>
+  declare categorie: BelongsTo<typeof Categorie>
 
   @belongsTo(() => Editeur, { foreignKey: 'idEditeur' })
-  declare editor: BelongsTo<typeof Editeur>
+  declare editeur: BelongsTo<typeof Editeur>
 
   @belongsTo(() => Auteur, { foreignKey: 'idAuteur' })
-  declare author: BelongsTo<typeof Auteur>
+  declare auteur: BelongsTo<typeof Auteur>
 
-  // Many-to-Many for Comments
   @manyToMany(() => Utilisateur, {
     pivotTable: 'commenter',
     pivotForeignKey: 'Id_Ouvrage',
@@ -70,7 +66,6 @@ export default class Ouvrage extends BaseModel {
   })
   declare commenters: ManyToMany<typeof Utilisateur>
 
-  // Many-to-Many for Appreciations
   @manyToMany(() => Utilisateur, {
     pivotTable: 'apprecier',
     pivotForeignKey: 'Id_Ouvrage',
