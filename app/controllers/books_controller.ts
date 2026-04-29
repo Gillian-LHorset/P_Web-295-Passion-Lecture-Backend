@@ -1,6 +1,6 @@
 import Ouvrage from '#models/ouvrage'
 import type { HttpContext } from '@adonisjs/core/http'
-import { createBookValidator } from '#validators/book'
+import { createBookValidator, updateBookValidator } from '#validators/book'
 
 export default class BooksController {
   /**
@@ -48,14 +48,76 @@ export default class BooksController {
   }
 
   /**
-   * Edit individual record
-   */
-  async edit({ params }: HttpContext) {}
-
-  /**
    * Handle form submission for the edit action
    */
-  async update({ params, request }: HttpContext) {}
+  async putBook({ params, request }: HttpContext) {
+    const id = params.id
+
+    const {
+      titre,
+      anneeEdition,
+      imageUrl,
+      nombrePages,
+      extrait,
+      resume,
+      idUtilisateur,
+      idCategorie,
+      idEditeur,
+      idAuteur,
+    } = await request.validateUsing(updateBookValidator)
+
+    const book = await Ouvrage.findOrFail(id)
+
+    book.merge({
+      titre,
+      anneeEdition,
+      imageUrl,
+      nombrePages,
+      extrait,
+      resume,
+      idUtilisateur,
+      idCategorie,
+      idEditeur,
+      idAuteur,
+    })
+
+    book.save()
+  }
+
+  async patchBook({ request, params, response }: HttpContext) {
+    const id = params.id
+    const {
+      titre,
+      anneeEdition,
+      imageUrl,
+      nombrePages,
+      extrait,
+      resume,
+      idUtilisateur,
+      idCategorie,
+      idEditeur,
+      idAuteur,
+    } = await request.body()
+
+    const book = await Ouvrage.findOrFail(id)
+
+    // only value changed by the user
+    const updateData = {
+      ...(titre !== undefined && { titre }),
+      ...(anneeEdition !== undefined && { anneeEdition }),
+      ...(imageUrl !== undefined && { imageUrl }),
+      ...(nombrePages !== undefined && { nombrePages }),
+      ...(extrait !== undefined && { extrait }),
+      ...(resume !== undefined && { resume }),
+      ...(idUtilisateur !== undefined && { idUtilisateur }),
+      ...(idCategorie !== undefined && { idCategorie }),
+      ...(idEditeur !== undefined && { idEditeur }),
+      ...(idAuteur !== undefined && { idAuteur }),
+    }
+
+    book.merge(updateData)
+    await book.save()
+  }
 
   /**
    * Delete record
