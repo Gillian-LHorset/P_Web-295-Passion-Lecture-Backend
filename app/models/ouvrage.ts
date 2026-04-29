@@ -1,35 +1,81 @@
-import { DateTime } from 'luxon'
-import { BaseModel, column } from '@adonisjs/lucid/orm'
+import { BaseModel, column, belongsTo, manyToMany } from '@adonisjs/lucid/orm'
+import type { BelongsTo, ManyToMany } from '@adonisjs/lucid/types/relations'
+import Utilisateur from '#models/user'
+import Categorie from '#models/categorie'
+import Editeur from '#models/editeur'
+import Auteur from '#models/auteur'
 
 export default class Ouvrage extends BaseModel {
-  @column({ isPrimary: true })
+  @column({ isPrimary: true, columnName: 'Id_Ouvrage' })
   declare id: number
-  @column()
-  declare titre: string
-  @column()
-  declare anneePublication: number
+
   @column()
   declare extrait: string
-  @column()
-  declare note_moyenne: number
-  @column()
-  declare commentaires: string
-  @column()
-  declare image_url: string
-  @column()
-  declare nombre_pages: number
 
   @column()
   declare resume: string
-  @column()
-  declare auteurId: number
-  @column()
-  declare editeurId: number
-  @column()
-  declare categorieId: number
-  @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime
+  @column({ columnName: 'annee_edition' })
+  declare anneeEdition: number
+
+  @column({ columnName: 'note_moyenne' })
+  declare noteMoyenne: number
+
+  @column()
+  declare commentaires: string | null
+
+  @column({ columnName: 'image_url' })
+  declare imageUrl: string | null
+
+  @column()
+  declare categorieNom: string // Mapped from 'categorie' column
+
+  @column({ columnName: 'nombre_pages' })
+  declare nombrePages: number
+
+  @column()
+  declare titre: string
+
+  @column({ columnName: 'Id_Utilisateur' })
+  declare idUtilisateur: number
+
+  @column({ columnName: 'Id_categorie' })
+  declare idCategorie: number
+
+  @column({ columnName: 'Id_editeur' })
+  declare idEditeur: number
+
+  @column({ columnName: 'Id_auteur' })
+  declare idAuteur: number
+
+  // Relationships
+  @belongsTo(() => Utilisateur, { foreignKey: 'idUtilisateur' })
+  declare user: BelongsTo<typeof Utilisateur>
+
+  @belongsTo(() => Categorie, { foreignKey: 'idCategorie' })
+  declare category: BelongsTo<typeof Categorie>
+
+  @belongsTo(() => Editeur, { foreignKey: 'idEditeur' })
+  declare editor: BelongsTo<typeof Editeur>
+
+  @belongsTo(() => Auteur, { foreignKey: 'idAuteur' })
+  declare author: BelongsTo<typeof Auteur>
+
+  // Many-to-Many for Comments
+  @manyToMany(() => Utilisateur, {
+    pivotTable: 'commenter',
+    pivotForeignKey: 'Id_Ouvrage',
+    pivotRelatedForeignKey: 'Id_Utilisateur',
+    pivotColumns: ['contenu'],
+  })
+  declare commenters: ManyToMany<typeof Utilisateur>
+
+  // Many-to-Many for Appreciations
+  @manyToMany(() => Utilisateur, {
+    pivotTable: 'apprecier',
+    pivotForeignKey: 'Id_Ouvrage',
+    pivotRelatedForeignKey: 'Id_Utilisateur',
+    pivotColumns: ['note'],
+  })
+  declare likers: ManyToMany<typeof Utilisateur>
 }

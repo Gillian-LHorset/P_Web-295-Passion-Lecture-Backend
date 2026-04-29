@@ -1,17 +1,17 @@
-import { DateTime } from 'luxon'
-import { BaseModel, column } from '@adonisjs/lucid/orm'
+import { BaseModel, column, hasMany } from '@adonisjs/lucid/orm'
+import type { HasMany } from '@adonisjs/lucid/types/relations'
+import Ouvrage from '#models/ouvrage'
 
 export default class Auteur extends BaseModel {
-  @column({ isPrimary: true })
+  @column({ isPrimary: true, columnName: 'Id_auteur' })
   declare id: number
-  @column()
-  declare nom: string
-  @column()
-  declare prenom: string
 
-  @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime
+  @column()
+  declare nom: string | null
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime
+  @column()
+  declare prenom: string | null
+
+  @hasMany(() => Ouvrage, { foreignKey: 'idAuteur' })
+  declare ouvrages: HasMany<typeof Ouvrage>
 }
