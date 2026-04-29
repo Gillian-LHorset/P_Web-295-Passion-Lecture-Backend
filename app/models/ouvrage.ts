@@ -18,9 +18,6 @@ export default class Ouvrage extends BaseModel {
   @column({ columnName: 'annee_edition' })
   declare anneeEdition: number
 
-  @column({ columnName: 'note_moyenne' })
-  declare noteMoyenne: number
-
   @column({ columnName: 'image_url' })
   declare imageUrl: string | null
 

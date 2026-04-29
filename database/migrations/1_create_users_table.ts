@@ -9,9 +9,6 @@ export default class extends BaseSchema {
       table.string('password', 180).notNullable()
       table.boolean('isAdmin').notNullable().defaultTo(false)
       table.string('pseudo', 15).nullable().unique()
-      table.integer('nombre_ouvrages_proposes').defaultTo(0)
-      table.integer('nombre_commentaires').defaultTo(0)
-      table.integer('nombre_appreciations').defaultTo(0)
 
       table.timestamp('created_at').notNullable()
       table.timestamp('updated_at').nullable()

@@ -8,7 +8,6 @@ export default class extends BaseSchema {
       table.increments('id')
       table.string('titre', 255).notNullable()
       table.integer('annee_edition')
-      table.float('note_moyenne', 2, 1)
       table.string('image_url', 255)
       table.integer('nombre_pages')
       table.text('extrait')

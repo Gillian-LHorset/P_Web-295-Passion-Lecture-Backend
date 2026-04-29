@@ -20,14 +20,6 @@ export default class User extends compose(BaseModel, AuthFinder) {
   declare pseudo: string | null
   @column()
   declare isAdmin: boolean | false
-  @column({ columnName: 'nombre_ouvrages_proposes' })
-  declare nombreOuvragesProposes: number
-
-  @column({ columnName: 'nombre_commentaires' })
-  declare nombreCommentaires: number
-
-  @column({ columnName: 'nombre_appreciations' })
-  declare nombreAppreciations: number
   @column({ serializeAs: null })
   declare password: string
 
