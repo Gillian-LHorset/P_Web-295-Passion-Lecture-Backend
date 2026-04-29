@@ -23,6 +23,7 @@ const updateBookValidator = vine.compile(
     nombrePages: vine.number().min(1).optional(),
     extrait: vine.string().trim().optional(),
     resume: vine.string().trim().optional(),
+    idUtilisateur: vine.number().min(1).optional(),
     idCategorie: vine.number().min(1).optional(),
     idEditeur: vine.number().min(1).optional(),
     idAuteur: vine.number().min(1).optional(),

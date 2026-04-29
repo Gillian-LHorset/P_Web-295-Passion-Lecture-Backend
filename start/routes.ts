@@ -38,4 +38,7 @@ router.get('/book/:id', [BooksController, 'getBook']).as('getBook')
 
 router.post('/add-book', [BooksController, 'createBook']).as('createBook')
 
+router.put('/put-book/:id', [BooksController, 'putBook'])
+router.patch('/patch-book/:id', [BooksController, 'patchBook'])
+
 router.delete('/delete-book/:id', [BooksController, 'deleteBook']).as('delete-book')
