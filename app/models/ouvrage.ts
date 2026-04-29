@@ -6,7 +6,7 @@ import Editeur from '#models/editeur'
 import Auteur from '#models/auteur'
 
 export default class Ouvrage extends BaseModel {
-  @column({ isPrimary: true, columnName: 'Id_Ouvrage' })
+  @column({ isPrimary: true, columnName: 'id' })
   declare id: number
 
   @column()
@@ -23,9 +23,6 @@ export default class Ouvrage extends BaseModel {
 
   @column({ columnName: 'image_url' })
   declare imageUrl: string | null
-
-  @column()
-  declare categorieNom: string
 
   @column({ columnName: 'nombre_pages' })
   declare nombrePages: number

@@ -6,12 +6,17 @@ export default class extends BaseSchema {
   async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
-      table.string('titre', 255).notNullable
+      table.string('titre', 255).notNullable()
       table.integer('annee_edition')
       table.float('note_moyenne', 2, 1)
       table.string('image_url', 255)
-      table.string('categorieNom', 255)
       table.integer('nombre_pages')
+      table.text('extrait')
+      table.text('resume')
+      table.integer('Id_Utilisateur').unsigned()
+      table.integer('Id_categorie').unsigned()
+      table.integer('Id_editeur').unsigned()
+      table.integer('Id_auteur').unsigned()
       table.timestamp('created_at')
       table.timestamp('updated_at')
     })

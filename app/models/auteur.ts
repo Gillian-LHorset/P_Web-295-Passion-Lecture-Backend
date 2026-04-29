@@ -3,7 +3,7 @@ import type { HasMany } from '@adonisjs/lucid/types/relations'
 import Ouvrage from '#models/ouvrage'
 
 export default class Auteur extends BaseModel {
-  @column({ isPrimary: true, columnName: 'Id_auteur' })
+  @column({ isPrimary: true, columnName: 'id' })
   declare id: number
 
   @column()
