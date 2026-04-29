@@ -20,7 +20,6 @@ export default class extends BaseSeeder {
         {
           titre: 'Dune',
           anneeEdition: 1965,
-          noteMoyenne: 4.8,
           imageUrl: 'https://example.com/dune.jpg',
           nombrePages: 600,
           idUtilisateur: users[0].id,
@@ -33,7 +32,6 @@ export default class extends BaseSeeder {
         {
           titre: "L'Étranger",
           anneeEdition: 1942,
-          noteMoyenne: 4.5,
           imageUrl: 'https://example.com/etranger.jpg',
           nombrePages: 160,
           idUtilisateur: users[1].id,

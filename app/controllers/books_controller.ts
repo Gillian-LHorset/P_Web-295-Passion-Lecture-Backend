@@ -21,7 +21,6 @@ export default class BooksController {
     const {
       titre,
       anneeEdition,
-      noteMoyenne,
       imageUrl,
       nombrePages,
       extrait,
@@ -35,7 +34,6 @@ export default class BooksController {
     const bookData = {
       titre,
       anneeEdition,
-      noteMoyenne,
       ...(imageUrl !== undefined && { imageUrl }), // add it only if the field in enter by the user
       nombrePages,
       extrait,
