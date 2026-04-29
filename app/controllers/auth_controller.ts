@@ -1,7 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import User from '#models/user'
 export default class AuthController {
-  async loginApi({ request, auth }: HttpContext) {
+  async loginApi({ request }: HttpContext) {
     const { pseudo, password } = request.all()
 
     const user = await User.verifyCredentials(pseudo, password)
