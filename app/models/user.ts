@@ -8,7 +8,7 @@ import { DbAccessTokensProvider } from '@adonisjs/auth/access_tokens'
 import Ouvrage from '#models/ouvrage'
 
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
-  uids: ['email'],
+  uids: ['pseudo'],
   passwordColumnName: 'password',
 })
 
