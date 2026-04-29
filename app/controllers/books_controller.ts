@@ -1,6 +1,6 @@
 import Ouvrage from '#models/ouvrage'
 import type { HttpContext } from '@adonisjs/core/http'
-import { postBookValidator } from '#validators/book'
+import { createBookValidator } from '#validators/book'
 
 export default class BooksController {
   /**
@@ -18,8 +18,35 @@ export default class BooksController {
    * Display form to create a new record
    */
   async createBook({ request }: HttpContext) {
-    const { test } = await request.validateUsing(postBookValidator)
-    return test
+    const {
+      titre,
+      anneeEdition,
+      noteMoyenne,
+      imageUrl,
+      nombrePages,
+      extrait,
+      resume,
+      idUtilisateur,
+      idCategorie,
+      idEditeur,
+      idAuteur,
+    } = await request.validateUsing(createBookValidator)
+
+    const bookData = {
+      titre,
+      anneeEdition,
+      noteMoyenne,
+      ...(imageUrl !== undefined && { imageUrl }), // add it only if the field in enter by the user
+      nombrePages,
+      extrait,
+      resume,
+      idUtilisateur,
+      idCategorie,
+      idEditeur,
+      idAuteur,
+    }
+
+    Ouvrage.create(bookData)
   }
 
   /**
