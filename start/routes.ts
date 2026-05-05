@@ -10,8 +10,22 @@ const AuthController = () => import('#controllers/auth_controller')
 const BooksController = () => import('#controllers/books_controller')
 import router from '@adonisjs/core/services/router'
 import { middleware } from '#start/kernel'
-import CategoriesController from '#controllers/categories_controller'
+const CategoriesController = () => import('#controllers/categories_controller')
 const AutorsController = () => import('#controllers/autors_controller')
+
+import AutoSwagger from 'adonis-autoswagger'
+import swagger from '#config/swagger'
+
+// Swagger documentation endpoint
+router.get('/swagger', async () => {
+  return AutoSwagger.default.docs(router.toJSON(), swagger)
+})
+
+// Swagger UI endpoint
+router.get('/docs', async () => {
+  return AutoSwagger.default.ui('/swagger', swagger)
+})
+
 router
   .group(() => {
     router.get('profile', async ({ auth }) => {
