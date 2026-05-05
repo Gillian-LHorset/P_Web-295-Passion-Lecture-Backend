@@ -1,128 +1,222 @@
 import Ouvrage from '#models/ouvrage'
 import type { HttpContext } from '@adonisjs/core/http'
 import { createBookValidator, updateBookValidator } from '#validators/book'
+import { NotFoundException, ValidationException } from '#exceptions/api_exception'
 
 export default class BooksController {
   /**
-   * Display a list of resource
+   * Display a list of resources
    */
   async getAllBooks({ response }: HttpContext) {
-    return Ouvrage.query()
-  }
-
-  async getBook({ params }: HttpContext) {
-    return Ouvrage.query().where('id', params.id)
-  }
-
-  /**
-   * Display form to create a new record
-   */
-  async createBook({ request }: HttpContext) {
-    const {
-      titre,
-      anneeEdition,
-      imageUrl,
-      nombrePages,
-      extrait,
-      resume,
-      idUtilisateur,
-      idCategorie,
-      idEditeur,
-      idAuteur,
-    } = await request.validateUsing(createBookValidator)
-
-    const bookData = {
-      titre,
-      anneeEdition,
-      ...(imageUrl !== undefined && { imageUrl }), // add it only if the field in enter by the user
-      nombrePages,
-      extrait,
-      resume,
-      idUtilisateur,
-      idCategorie,
-      idEditeur,
-      idAuteur,
+    try {
+      const books = await Ouvrage.query()
+      return response.ok({
+        success: true,
+        data: books,
+      })
+    } catch (error) {
+      throw error
     }
-
-    Ouvrage.create(bookData)
   }
 
   /**
-   * Handle form submission for the edit action
+   * Display a single resource by ID
    */
-  async putBook({ params, request }: HttpContext) {
-    const id = params.id
+  async getBook({ params, response }: HttpContext) {
+    try {
+      if (!params.id) {
+        throw new ValidationException('Book ID is required', { id: ['Book ID is required'] })
+      }
 
-    const {
-      titre,
-      anneeEdition,
-      imageUrl,
-      nombrePages,
-      extrait,
-      resume,
-      idUtilisateur,
-      idCategorie,
-      idEditeur,
-      idAuteur,
-    } = await request.validateUsing(updateBookValidator)
+      const book = await Ouvrage.find(params.id)
 
-    const book = await Ouvrage.findOrFail(id)
+      if (!book) {
+        throw new NotFoundException('Book')
+      }
 
-    book.merge({
-      titre,
-      anneeEdition,
-      imageUrl,
-      nombrePages,
-      extrait,
-      resume,
-      idUtilisateur,
-      idCategorie,
-      idEditeur,
-      idAuteur,
-    })
-
-    book.save()
+      return response.ok({
+        success: true,
+        data: book,
+      })
+    } catch (error) {
+      throw error
+    }
   }
 
+  /**
+   * Create a new book
+   */
+  async createBook({ request, response }: HttpContext) {
+    try {
+      const {
+        titre,
+        anneeEdition,
+        imageUrl,
+        nombrePages,
+        extrait,
+        resume,
+        idUtilisateur,
+        idCategorie,
+        idEditeur,
+        idAuteur,
+      } = await request.validateUsing(createBookValidator)
+
+      const bookData = {
+        titre,
+        anneeEdition,
+        ...(imageUrl !== undefined && { imageUrl }),
+        nombrePages,
+        extrait,
+        resume,
+        idUtilisateur,
+        idCategorie,
+        idEditeur,
+        idAuteur,
+      }
+
+      const book = await Ouvrage.create(bookData)
+
+      return response.created({
+        success: true,
+        message: 'Book created successfully',
+        data: book,
+      })
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * Update a book (full update)
+   */
+  async putBook({ params, request, response }: HttpContext) {
+    try {
+      if (!params.id) {
+        throw new ValidationException('Book ID is required', { id: ['Book ID is required'] })
+      }
+
+      const {
+        titre,
+        anneeEdition,
+        imageUrl,
+        nombrePages,
+        extrait,
+        resume,
+        idUtilisateur,
+        idCategorie,
+        idEditeur,
+        idAuteur,
+      } = await request.validateUsing(updateBookValidator)
+
+      const book = await Ouvrage.find(params.id)
+
+      if (!book) {
+        throw new NotFoundException('Book')
+      }
+
+      book.merge({
+        titre,
+        anneeEdition,
+        imageUrl,
+        nombrePages,
+        extrait,
+        resume,
+        idUtilisateur,
+        idCategorie,
+        idEditeur,
+        idAuteur,
+      })
+
+      await book.save()
+
+      return response.ok({
+        success: true,
+        message: 'Book updated successfully',
+        data: book,
+      })
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * Partial update a book
+   */
   async patchBook({ request, params, response }: HttpContext) {
-    const id = params.id
-    const {
-      titre,
-      anneeEdition,
-      imageUrl,
-      nombrePages,
-      extrait,
-      resume,
-      idUtilisateur,
-      idCategorie,
-      idEditeur,
-      idAuteur,
-    } = await request.body()
+    try {
+      if (!params.id) {
+        throw new ValidationException('Book ID is required', { id: ['Book ID is required'] })
+      }
 
-    const book = await Ouvrage.findOrFail(id)
+      const book = await Ouvrage.find(params.id)
 
-    // only value changed by the user
-    const updateData = {
-      ...(titre !== undefined && { titre }),
-      ...(anneeEdition !== undefined && { anneeEdition }),
-      ...(imageUrl !== undefined && { imageUrl }),
-      ...(nombrePages !== undefined && { nombrePages }),
-      ...(extrait !== undefined && { extrait }),
-      ...(resume !== undefined && { resume }),
-      ...(idUtilisateur !== undefined && { idUtilisateur }),
-      ...(idCategorie !== undefined && { idCategorie }),
-      ...(idEditeur !== undefined && { idEditeur }),
-      ...(idAuteur !== undefined && { idAuteur }),
+      if (!book) {
+        throw new NotFoundException('Book')
+      }
+
+      const {
+        titre,
+        anneeEdition,
+        imageUrl,
+        nombrePages,
+        extrait,
+        resume,
+        idUtilisateur,
+        idCategorie,
+        idEditeur,
+        idAuteur,
+      } = await request.body()
+
+      // only update values changed by the user
+      const updateData = {
+        ...(titre !== undefined && { titre }),
+        ...(anneeEdition !== undefined && { anneeEdition }),
+        ...(imageUrl !== undefined && { imageUrl }),
+        ...(nombrePages !== undefined && { nombrePages }),
+        ...(extrait !== undefined && { extrait }),
+        ...(resume !== undefined && { resume }),
+        ...(idUtilisateur !== undefined && { idUtilisateur }),
+        ...(idCategorie !== undefined && { idCategorie }),
+        ...(idEditeur !== undefined && { idEditeur }),
+        ...(idAuteur !== undefined && { idAuteur }),
+      }
+
+      book.merge(updateData)
+      await book.save()
+
+      return response.ok({
+        success: true,
+        message: 'Book updated successfully',
+        data: book,
+      })
+    } catch (error) {
+      throw error
     }
-
-    book.merge(updateData)
-    await book.save()
   }
 
   /**
-   * Delete record
+   * Delete a book
    */
-  async deleteBook({ params }: HttpContext) {
-    Ouvrage.query().delete().where('id', params.id)
+  async deleteBook({ params, response }: HttpContext) {
+    try {
+      if (!params.id) {
+        throw new ValidationException('Book ID is required', { id: ['Book ID is required'] })
+      }
+
+      const book = await Ouvrage.find(params.id)
+
+      if (!book) {
+        throw new NotFoundException('Book')
+      }
+
+      await book.delete()
+
+      return response.ok({
+        success: true,
+        message: 'Book deleted successfully',
+      })
+    } catch (error) {
+      throw error
+    }
   }
 }
