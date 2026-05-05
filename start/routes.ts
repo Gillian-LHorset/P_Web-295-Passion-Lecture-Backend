@@ -49,18 +49,18 @@ router.get('/', async () => {
 })
 router.post('/api/login', [AuthController, 'loginApi'])
 router.post('/api/register', [AuthController, 'registerApi'])
-router.post('/api/logout', [AuthController, 'logoutApi'])
+router.post('/api/logout', [AuthController, 'logoutApi']).use(middleware.auth())
 router.group(() => {
   router.get('/api/books', [BooksController, 'index']).as('books.index')
 
   router.get('/api/book/:id', [BooksController, 'show']).as('books.show')
 
-  router.post('/api/book', [BooksController, 'store']).as('books.store')
+  router.post('/api/book', [BooksController, 'store']).as('books.store').use(middleware.auth())
 
-  router.put('/api/book/:id', [BooksController, 'update']).as('books.updateComplete')
+  router.put('/api/book/:id', [BooksController, 'update']).as('books.updateComplete').use(middleware.auth())
   router.patch('/api/book/:id', [BooksController, 'updatePartial']).as('books.updatePartial')
 
-  router.delete('/api/book/:id', [BooksController, 'destroy']).as('books.destroy')
+  router.delete('/api/book/:id', [BooksController, 'destroy']).as('books.destroy').use(middleware.auth())
 })
 
 router.group(() => {
