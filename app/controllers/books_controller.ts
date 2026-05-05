@@ -43,6 +43,18 @@ export default class BooksController {
     }
   }
 
+  async getBooksByName({ request }: HttpContext) {
+    const { titre } = request.qs()
+
+    if (!titre) {
+      throw new NotFoundException('Book')
+    }
+
+    const book = Ouvrage.query().where('titre', 'LIKE', `%${titre}%`)
+
+    return book
+  }
+
   /**
    * Create a new book
    */

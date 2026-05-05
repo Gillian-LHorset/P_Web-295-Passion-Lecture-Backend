@@ -1,3 +1,4 @@
+import { NotFoundException } from '#exceptions/api_exception'
 import Auteur from '#models/auteur'
 import { createAuteurValidator, updateAuteurValidator } from '#validators/auteur'
 import type { HttpContext } from '@adonisjs/core/http'
@@ -12,6 +13,18 @@ export default class AutorsController {
 
   async getAutor({ params }: HttpContext) {
     return Auteur.query().where('id', params.id)
+  }
+
+  async getAutorsByName({ request }: HttpContext) {
+    const { nom } = request.qs()
+
+    if (!nom) {
+      throw new NotFoundException('Book')
+    }
+
+    const autor = Auteur.query().where('nom', 'LIKE', `%${nom}%`)
+
+    return autor
   }
 
   /**
