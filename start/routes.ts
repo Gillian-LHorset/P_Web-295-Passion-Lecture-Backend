@@ -10,7 +10,7 @@ const AuthController = () => import('#controllers/auth_controller')
 const BooksController = () => import('#controllers/books_controller')
 import router from '@adonisjs/core/services/router'
 import { middleware } from '#start/kernel'
-import AutorsController from '#controllers/autors_controller'
+const AutorsController = () => import('#controllers/autors_controller')
 router
   .group(() => {
     router.get('profile', async ({ auth }) => {
