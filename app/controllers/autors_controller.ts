@@ -7,30 +7,24 @@ export default class AutorsController {
   /**
    * Display a list of resource
    */
-  async getAllAutors({}: HttpContext) {
-    return Auteur.query()
-  }
-
-  async getAutor({ params }: HttpContext) {
-    return Auteur.query().where('id', params.id)
-  }
-
-  async getAutorsByName({ request }: HttpContext) {
+  async index({ request }: HttpContext) {
     const { nom } = request.qs()
 
-    if (!nom) {
-      throw new NotFoundException('Book')
+    if (nom) {
+      return Auteur.query().where('nom', 'LIKE', `%${nom}%`)
     }
 
-    const autor = Auteur.query().where('nom', 'LIKE', `%${nom}%`)
+    return Auteur.all()
+  }
 
-    return autor
+  async show({ params }: HttpContext) {
+    return Auteur.query().where('id', params.id)
   }
 
   /**
    * Display form to create a new record
    */
-  async createAutor({ request }: HttpContext) {
+  async store({ request }: HttpContext) {
     const { nom, prenom } = await request.validateUsing(createAuteurValidator)
 
     const newAutor = { nom, prenom }
@@ -41,7 +35,7 @@ export default class AutorsController {
   /**
    * Handle form submission for the create action
    */
-  async putAutor({ request }: HttpContext) {
+  async update({ request }: HttpContext) {
     const { nom, prenom } = await request.validateUsing(createAuteurValidator)
 
     const newAutor = await Auteur.findOrFail(request.id)
@@ -54,7 +48,7 @@ export default class AutorsController {
     newAutor.save()
   }
 
-  async patchAutor({ request, params }: HttpContext) {
+  async updatePartial({ request, params }: HttpContext) {
     const id = params.id
     const { nom, prenom } = await request.body()
 
@@ -73,7 +67,7 @@ export default class AutorsController {
   /**
    * Delete record
    */
-  async deleteAutor({ params }: HttpContext) {
+  async destroy({ params }: HttpContext) {
     Auteur.query().delete().where('id', params.id)
   }
 }

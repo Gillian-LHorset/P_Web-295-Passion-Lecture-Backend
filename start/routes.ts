@@ -37,30 +37,28 @@ router.post('login/api', [AuthController, 'loginApi'])
 router.post('register/api', [AuthController, 'registerApi'])
 
 router.group(() => {
-  router.get('/books', [BooksController, 'getAllBooks']).as('getAllBooks')
+  router.get('/api/books', [BooksController, 'index']).as('books.index')
 
-  router.get('/book/:id', [BooksController, 'getBook']).as('getBook')
-  router.get('/get-books', [BooksController, 'getBooksByName']).as('getBooksByName')
+  router.get('/api/book/:id', [BooksController, 'show']).as('books.show')
 
-  router.post('/add-book', [BooksController, 'createBook']).as('createBook')
+  router.post('/api/book', [BooksController, 'store']).as('books.store')
 
-  router.put('/put-book/:id', [BooksController, 'putBook'])
-  router.patch('/patch-book/:id', [BooksController, 'patchBook'])
+  router.put('/api/book/:id', [BooksController, 'update']).as('books.updateComplete')
+  router.patch('/api/book/:id', [BooksController, 'updatePartial']).as('books.updatePartial')
 
-  router.delete('/delete-book/:id', [BooksController, 'deleteBook']).as('deleteBook')
+  router.delete('/api/book/:id', [BooksController, 'destroy']).as('books.destroy')
 })
 
 router.group(() => {
-  router.get('/autors', [AutorsController, 'getAllAutors'])
-  router.get('/autor/:id', [AutorsController, 'getAutor'])
-  router.get('/get-autors', [AutorsController, 'getAutorsByName']).as('getAutorsByName')
+  router.get('/api/autors', [AutorsController, 'index']).as('autor.index')
+  router.get('/api/autor/:id', [AutorsController, 'show']).as('autor.show')
 
-  router.post('/add-autor', [AutorsController, 'createAutor']).as('createAutor')
+  router.post('/api/autor', [AutorsController, 'store']).as('autor.store')
 
-  router.put('/put-autor/:id', [AutorsController, 'putAutor'])
-  router.patch('/patch-autor/:id', [AutorsController, 'patchAutor'])
+  router.put('/api/autor/:id', [AutorsController, 'update']).as('autor.updateComplet')
+  router.patch('/api/autor/:id', [AutorsController, 'updatePartial']).as('autor.updatePartial')
 
-  router.delete('/delete-autor/:id', [AutorsController, 'deleteAutor']).as('deleteAutor')
+  router.delete('/api/autor/:id', [AutorsController, 'destroy']).as('autor.destroy')
 })
 
-router.get('/get-categories', [CategoriesController, 'getCategorysByName']).as('getCategorysByName')
+router.get('/api/categories', [CategoriesController, 'index']).as('category.index')

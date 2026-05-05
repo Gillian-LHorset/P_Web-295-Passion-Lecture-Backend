@@ -7,22 +7,20 @@ export default class BooksController {
   /**
    * Display a list of resources
    */
-  async getAllBooks({ response }: HttpContext) {
-    try {
-      const books = await Ouvrage.query()
-      return response.ok({
-        success: true,
-        data: books,
-      })
-    } catch (error) {
-      throw error
+  async index({ request }: HttpContext) {
+    const { titre } = request.qs()
+
+    if (titre) {
+      return Ouvrage.query().where('titre', 'LIKE', `%${titre}%`)
     }
+
+    return Ouvrage.all()
   }
 
   /**
    * Display a single resource by ID
    */
-  async getBook({ params, response }: HttpContext) {
+  async show({ params, response }: HttpContext) {
     try {
       if (!params.id) {
         throw new ValidationException('Book ID is required', { id: ['Book ID is required'] })
@@ -43,22 +41,10 @@ export default class BooksController {
     }
   }
 
-  async getBooksByName({ request }: HttpContext) {
-    const { titre } = request.qs()
-
-    if (!titre) {
-      throw new NotFoundException('Book')
-    }
-
-    const book = Ouvrage.query().where('titre', 'LIKE', `%${titre}%`)
-
-    return book
-  }
-
   /**
    * Create a new book
    */
-  async createBook({ request, response }: HttpContext) {
+  async store({ request, response }: HttpContext) {
     try {
       const {
         titre,
@@ -101,7 +87,7 @@ export default class BooksController {
   /**
    * Update a book (full update)
    */
-  async putBook({ params, request, response }: HttpContext) {
+  async update({ params, request, response }: HttpContext) {
     try {
       if (!params.id) {
         throw new ValidationException('Book ID is required', { id: ['Book ID is required'] })
@@ -154,7 +140,7 @@ export default class BooksController {
   /**
    * Partial update a book
    */
-  async patchBook({ request, params, response }: HttpContext) {
+  async updatePartial({ request, params, response }: HttpContext) {
     try {
       if (!params.id) {
         throw new ValidationException('Book ID is required', { id: ['Book ID is required'] })
@@ -209,7 +195,7 @@ export default class BooksController {
   /**
    * Delete a book
    */
-  async deleteBook({ params, response }: HttpContext) {
+  async destroy({ params, response }: HttpContext) {
     try {
       if (!params.id) {
         throw new ValidationException('Book ID is required', { id: ['Book ID is required'] })
