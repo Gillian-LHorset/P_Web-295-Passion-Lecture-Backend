@@ -23,22 +23,6 @@ export default class AuthController {
       value: token.value!.release(),
     })
   }
-  async registerWeb({ request, auth, response }: HttpContext) {
-    const payload = await request.validateUsing(registerValidator)
-    const user = await User.create(payload)
-
-    await auth.use('web').login(user)
-
-    return response.redirect('/dashboard')
-  }
-  async loginWeb({ request, auth, response }: HttpContext) {
-    const { pseudo, password } = request.all()
-    const user = await User.verifyCredentials(pseudo, password)
-
-    await auth.use('web').login(user)
-
-    return response.redirect('/dashboard')
-  }
   async logoutApi({ auth, response }: HttpContext) {
     const guard = auth.use('api')
     await guard.authenticate()
@@ -46,9 +30,5 @@ export default class AuthController {
     await User.accessTokens.delete(user, user.currentAccessToken.identifier)
 
     return response.ok({ revoked: true })
-  }
-  async logoutWeb({ auth, response }: HttpContext) {
-    await auth.use('web').logout()
-    return response.ok({ message: 'Logged out from session' })
   }
 }

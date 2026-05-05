@@ -1,5 +1,4 @@
 import vine from '@vinejs/vine'
-import User from '#models/user'
 
 export const registerValidator = vine.compile(
   vine.object({
