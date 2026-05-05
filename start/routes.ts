@@ -35,7 +35,6 @@ router.get('/', async () => {
 router.post('login/api', [AuthController, 'loginApi'])
 router.post('register/api', [AuthController, 'registerApi'])
 router.post('register/web', [AuthController, 'registerWeb'])
-router.get('/books', [BooksController, 'getAllBooks']).as('getAllBooks')
 
 router.group(() => {
   router.get('/books', [BooksController, 'getAllBooks']).as('getAllBooks')

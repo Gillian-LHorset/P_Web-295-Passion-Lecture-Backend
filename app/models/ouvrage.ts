@@ -2,7 +2,6 @@ import { BaseModel, column, belongsTo, manyToMany } from '@adonisjs/lucid/orm'
 import type { BelongsTo, ManyToMany } from '@adonisjs/lucid/types/relations'
 import Utilisateur from '#models/user'
 import Categorie from '#models/categorie'
-import Editeur from '#models/editeur'
 import Auteur from '#models/auteur'
 
 export default class Ouvrage extends BaseModel {
@@ -27,14 +26,14 @@ export default class Ouvrage extends BaseModel {
   @column()
   declare titre: string
 
+  @column({ columnName: 'nom_editeur' })
+  declare nomEditeur: string
+
   @column({ columnName: 'Id_Utilisateur' })
   declare idUtilisateur: number
 
   @column({ columnName: 'Id_categorie' })
   declare idCategorie: number
-
-  @column({ columnName: 'Id_editeur' })
-  declare idEditeur: number
 
   @column({ columnName: 'Id_auteur' })
   declare idAuteur: number
@@ -44,9 +43,6 @@ export default class Ouvrage extends BaseModel {
 
   @belongsTo(() => Categorie, { foreignKey: 'idCategorie' })
   declare categorie: BelongsTo<typeof Categorie>
-
-  @belongsTo(() => Editeur, { foreignKey: 'idEditeur' })
-  declare editeur: BelongsTo<typeof Editeur>
 
   @belongsTo(() => Auteur, { foreignKey: 'idAuteur' })
   declare auteur: BelongsTo<typeof Auteur>

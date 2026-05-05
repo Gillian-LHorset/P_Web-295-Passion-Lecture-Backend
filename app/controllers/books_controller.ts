@@ -55,9 +55,9 @@ export default class BooksController {
         nombrePages,
         extrait,
         resume,
+        nomEditeur,
         idUtilisateur,
         idCategorie,
-        idEditeur,
         idAuteur,
       } = await request.validateUsing(createBookValidator)
 
@@ -68,9 +68,9 @@ export default class BooksController {
         nombrePages,
         extrait,
         resume,
+        nomEditeur,
         idUtilisateur,
         idCategorie,
-        idEditeur,
         idAuteur,
       }
 
@@ -102,9 +102,9 @@ export default class BooksController {
         nombrePages,
         extrait,
         resume,
+        nomEditeur,
         idUtilisateur,
         idCategorie,
-        idEditeur,
         idAuteur,
       } = await request.validateUsing(updateBookValidator)
 
@@ -121,9 +121,9 @@ export default class BooksController {
         nombrePages,
         extrait,
         resume,
+        nomEditeur,
         idUtilisateur,
         idCategorie,
-        idEditeur,
         idAuteur,
       })
 
@@ -161,9 +161,9 @@ export default class BooksController {
         nombrePages,
         extrait,
         resume,
+        nomEditeur,
         idUtilisateur,
         idCategorie,
-        idEditeur,
         idAuteur,
       } = await request.body()
 
@@ -177,7 +177,7 @@ export default class BooksController {
         ...(resume !== undefined && { resume }),
         ...(idUtilisateur !== undefined && { idUtilisateur }),
         ...(idCategorie !== undefined && { idCategorie }),
-        ...(idEditeur !== undefined && { idEditeur }),
+        ...(nomEditeur !== undefined && { nomEditeur }),
         ...(idAuteur !== undefined && { idAuteur }),
       }
 

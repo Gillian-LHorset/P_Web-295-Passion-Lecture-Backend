@@ -8,9 +8,9 @@ const createBookValidator = vine.compile(
     nombrePages: vine.number().min(1),
     extrait: vine.string().trim(),
     resume: vine.string().trim(),
+    nomEditeur: vine.string().trim().minLength(1).maxLength(255),
     idUtilisateur: vine.number().min(1),
     idCategorie: vine.number().min(1),
-    idEditeur: vine.number().min(1),
     idAuteur: vine.number().min(1),
   })
 )
@@ -23,9 +23,9 @@ const updateBookValidator = vine.compile(
     nombrePages: vine.number().min(1).optional(),
     extrait: vine.string().trim().optional(),
     resume: vine.string().trim().optional(),
+    nomEditeur: vine.string().trim().minLength(1).maxLength(255),
     idUtilisateur: vine.number().min(1).optional(),
     idCategorie: vine.number().min(1).optional(),
-    idEditeur: vine.number().min(1).optional(),
     idAuteur: vine.number().min(1).optional(),
   })
 )

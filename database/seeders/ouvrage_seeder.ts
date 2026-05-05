@@ -3,14 +3,12 @@ import Ouvrage from '#models/ouvrage'
 import User from '#models/user'
 import Categorie from '#models/categorie'
 import Auteur from '#models/auteur'
-import Editeur from '#models/editeur'
 
 export default class extends BaseSeeder {
   async run() {
     const users = await User.all()
     const categories = await Categorie.all()
     const auteurs = await Auteur.all()
-    const editeurs = await Editeur.all()
 
     const count = await Ouvrage.query()
       .count('* as total')
@@ -25,7 +23,7 @@ export default class extends BaseSeeder {
           idUtilisateur: users[0].id,
           idCategorie: categories[0].id,
           idAuteur: auteurs[0].id,
-          idEditeur: editeurs[0].id,
+          nomEditeur: 'DePoche',
           extrait: 'Le voyage commence...',
           resume: "Un chef-d'oeuvre de la SF.",
         },
@@ -37,7 +35,7 @@ export default class extends BaseSeeder {
           idUtilisateur: users[1].id,
           idCategorie: categories[1].id,
           idAuteur: auteurs[1].id,
-          idEditeur: editeurs[1].id,
+          nomEditeur: 'Anthone',
           extrait: "Aujourd'hui, maman est morte.",
           resume: "Une exploration de l'absurde.",
         },
