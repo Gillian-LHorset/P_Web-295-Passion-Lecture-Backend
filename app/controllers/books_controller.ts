@@ -64,7 +64,7 @@ export default class BooksController {
       idCategorie,
       idEditeur,
       idAuteur,
-    } = await request.validateUsing(updateBookValidator)
+    } = await request.validateUsing(createBookValidator)
 
     const book = await Ouvrage.findOrFail(id)
 

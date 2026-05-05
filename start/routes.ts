@@ -10,6 +10,7 @@ const AuthController = () => import('#controllers/auth_controller')
 const BooksController = () => import('#controllers/books_controller')
 import router from '@adonisjs/core/services/router'
 import { middleware } from '#start/kernel'
+import AutorsController from '#controllers/autors_controller'
 router
   .group(() => {
     router.get('profile', async ({ auth }) => {
@@ -34,13 +35,27 @@ router.get('/', async () => {
 router.post('login/api', [AuthController, 'loginApi'])
 router.post('register/api', [AuthController, 'registerApi'])
 router.post('register/web', [AuthController, 'registerWeb'])
-router.get('/books', [BooksController, 'getAllBooks']).as('getAllBooks')
 
-router.get('/book/:id', [BooksController, 'getBook']).as('getBook')
+router.group(() => {
+  router.get('/books', [BooksController, 'getAllBooks']).as('getAllBooks')
 
-router.post('/add-book', [BooksController, 'createBook']).as('createBook')
+  router.get('/book/:id', [BooksController, 'getBook']).as('getBook')
 
-router.put('/put-book/:id', [BooksController, 'putBook'])
-router.patch('/patch-book/:id', [BooksController, 'patchBook'])
+  router.post('/add-book', [BooksController, 'createBook']).as('createBook')
 
-router.delete('/delete-book/:id', [BooksController, 'deleteBook']).as('delete-book')
+  router.put('/put-book/:id', [BooksController, 'putBook'])
+  router.patch('/patch-book/:id', [BooksController, 'patchBook'])
+
+  router.delete('/delete-book/:id', [BooksController, 'deleteBook']).as('deleteBook')
+})
+
+router.group(() => {
+  router.get('/autors', [AutorsController, 'getAllAutors'])
+  router.get('/autor/:id', [AutorsController, 'getAutor'])
+  router.post('/add-autor', [AutorsController, 'createAutor']).as('createAutor')
+
+  router.put('/put-autor/:id', [AutorsController, 'putAutor'])
+  router.patch('/patch-autor/:id', [AutorsController, 'patchAutor'])
+
+  router.delete('/delete-autor/:id', [AutorsController, 'deleteAutor']).as('deleteAutor')
+})
