@@ -1,69 +1,163 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import User from '#models/user'
 import { registerValidator } from '#validators/register'
-import { UnauthorizedException, ValidationException } from '#exceptions/api_exception'
+import { ValidationException } from '#exceptions/api_exception'
 
 export default class AuthController {
-  async loginApi({ request }: HttpContext) {
+  private formatErrorResponse(status: number, message: string, code: string, details?: any) {
+    return {
+      success: false,
+      status,
+      code,
+      message,
+      ...(details && { details }),
+    }
+  }
+
+  private formatSuccessResponse(data: any, status: number = 200, message: string = 'Succès') {
+    return {
+      success: true,
+      status,
+      message,
+      data,
+    }
+  }
+
+  async loginApi({ request, response }: HttpContext) {
     try {
       const { pseudo, password } = request.all()
 
       if (!pseudo || !password) {
-        throw new ValidationException('Missing pseudo or password', {
-          pseudo: pseudo ? [] : ['Pseudo is required'],
-          password: password ? [] : ['Password is required'],
-        })
+        const errors: Record<string, string[]> = {}
+        if (!pseudo) errors.pseudo = ['Pseudo requis']
+        if (!password) errors.password = ['Mot de passe requis']
+
+        return response.badRequest(
+          this.formatErrorResponse(400, 'Validation échouée', 'E_VALIDATION_ERROR', errors)
+        )
       }
 
-      const user = await User.verifyCredentials(pseudo, password)
+      try {
+        const user = await User.verifyCredentials(pseudo, password)
+        const token = await User.accessTokens.create(user)
 
-      const token = await User.accessTokens.create(user)
-
-      return {
-        success: true,
-        type: 'bearer',
-        value: token.value!.release(),
+        return response.ok(
+          this.formatSuccessResponse(
+            {
+              type: 'bearer',
+              value: token.value!.release(),
+            },
+            200,
+            'Connexion réussie'
+          )
+        )
+      } catch (credentialError) {
+        return response.unauthorized(
+          this.formatErrorResponse(401, 'Identifiants invalides', 'E_UNAUTHORIZED')
+        )
       }
     } catch (error) {
-      if (error instanceof ValidationException) {
-        throw error
-      }
-      if (error instanceof Error && error.message.includes('Credentials')) {
-        throw new UnauthorizedException('Invalid credentials')
-      }
-      throw error
+      return response.internalServerError(
+        this.formatErrorResponse(
+          500,
+          'Erreur interne du serveur',
+          'E_INTERNAL_SERVER_ERROR',
+          error instanceof Error ? error.message : 'Erreur inconnue'
+        )
+      )
     }
   }
 
   async registerApi({ request, response }: HttpContext) {
     try {
       const payload = await request.validateUsing(registerValidator)
-      const user = await User.create(payload)
-      const token = await User.accessTokens.create(user)
 
-      return response.created({
-        success: true,
-        type: 'bearer',
-        value: token.value!.release(),
-      })
+      try {
+        const user = await User.create(payload)
+        const token = await User.accessTokens.create(user)
+
+        return response.created(
+          this.formatSuccessResponse(
+            {
+              userId: user.id,
+              type: 'bearer',
+              value: token.value!.release(),
+            },
+            201,
+            'Enregistrement réussi'
+          )
+        )
+      } catch (dbError) {
+        if (dbError instanceof Error && dbError.message.includes('unique')) {
+          return response.badRequest(
+            this.formatErrorResponse(400, "L'utilisateur existe déjà", 'E_USER_ALREADY_EXISTS')
+          )
+        }
+        throw dbError
+      }
     } catch (error) {
-      throw error
+      if (error instanceof ValidationException) {
+        return response.unprocessableEntity(
+          this.formatErrorResponse(422, 'Validation échouée', 'E_VALIDATION_ERROR', error.errors)
+        )
+      }
+
+      return response.internalServerError(
+        this.formatErrorResponse(
+          500,
+          'Erreur interne du serveur',
+          'E_INTERNAL_SERVER_ERROR',
+          error instanceof Error ? error.message : 'Erreur inconnue'
+        )
+      )
     }
   }
 
   async logoutApi({ auth, response }: HttpContext) {
     try {
       const guard = auth.use('api')
-      await guard.authenticate()
-      const user = guard.user!
-      await User.accessTokens.delete(user, user.currentAccessToken.identifier)
 
-      return response.ok({ success: true, revoked: true })
-    } catch (error) {
-      if (error instanceof Error && error.message.includes('Unauthenticated')) {
-        throw new UnauthorizedException('Unauthenticated')
+      try {
+        await guard.authenticate()
+      } catch (authError) {
+        return response.unauthorized(
+          this.formatErrorResponse(401, 'Non authentifié', 'E_UNAUTHORIZED')
+        )
       }
-      throw error
+
+      const user = guard.user!
+
+      try {
+        await User.accessTokens.delete(user, user.currentAccessToken.identifier)
+
+        return response.ok(
+          this.formatSuccessResponse(
+            {
+              revoked: true,
+            },
+            200,
+            'Déconnexion réussie'
+          )
+        )
+      } catch (tokenError) {
+        return response.internalServerError(
+          this.formatErrorResponse(
+            500,
+            'Impossible de révoquer le jeton',
+            'E_TOKEN_REVOKE_FAILED',
+            tokenError instanceof Error ? tokenError.message : 'Erreur inconnue'
+          )
+        )
+      }
+    } catch (error) {
+      return response.internalServerError(
+        this.formatErrorResponse(
+          500,
+          'Erreur interne du serveur',
+          'E_INTERNAL_SERVER_ERROR',
+          error instanceof Error ? error.message : 'Erreur inconnue'
+        )
+      )
     }
   }
 }

@@ -1,49 +1,81 @@
 import Ouvrage from '#models/ouvrage'
 import type { HttpContext } from '@adonisjs/core/http'
 import { createBookValidator, updateBookValidator } from '#validators/book'
-import { NotFoundException, ValidationException } from '#exceptions/api_exception'
+import { ValidationException } from '#exceptions/api_exception'
 
 export default class BooksController {
-  /**
-   * Display a list of resources
-   */
-  async index({ request }: HttpContext) {
-    const { titre } = request.qs()
-
-    if (titre) {
-      return Ouvrage.query().where('titre', 'LIKE', `%${titre}%`)
+  private formatErrorResponse(status: number, message: string, code: string, details?: any) {
+    return {
+      success: false,
+      status,
+      code,
+      message,
+      ...(details && { details }),
     }
-
-    return Ouvrage.all()
   }
 
-  /**
-   * Display a single resource by ID
-   */
+  private formatSuccessResponse(data: any, status: number = 200, message: string = 'Succès') {
+    return {
+      success: true,
+      status,
+      message,
+      data,
+    }
+  }
+
+  async index({ request, response }: HttpContext) {
+    try {
+      const { titre } = request.qs()
+
+      let books
+      if (titre) {
+        books = await Ouvrage.query().where('titre', 'LIKE', `%${titre}%`)
+      } else {
+        books = await Ouvrage.all()
+      }
+
+      return response.ok(this.formatSuccessResponse(books, 200, 'Livres récupérés avec succès'))
+    } catch (error) {
+      return response.internalServerError(
+        this.formatErrorResponse(
+          500,
+          'Erreur interne du serveur',
+          'E_INTERNAL_SERVER_ERROR',
+          error instanceof Error ? error.message : 'Erreur inconnue'
+        )
+      )
+    }
+  }
+
   async show({ params, response }: HttpContext) {
     try {
       if (!params.id) {
-        throw new ValidationException('Book ID is required', { id: ['Book ID is required'] })
+        return response.badRequest(
+          this.formatErrorResponse(400, "L'ID du livre est requis", 'E_VALIDATION_ERROR', {
+            id: ["L'ID du livre est requis"],
+          })
+        )
       }
 
       const book = await Ouvrage.find(params.id)
 
       if (!book) {
-        throw new NotFoundException('Book')
+        return response.notFound(this.formatErrorResponse(404, 'Livre non trouvé', 'E_NOT_FOUND'))
       }
 
-      return response.ok({
-        success: true,
-        data: book,
-      })
+      return response.ok(this.formatSuccessResponse(book, 200, 'Livre récupéré avec succès'))
     } catch (error) {
-      throw error
+      return response.internalServerError(
+        this.formatErrorResponse(
+          500,
+          'Erreur interne du serveur',
+          'E_INTERNAL_SERVER_ERROR',
+          error instanceof Error ? error.message : 'Erreur inconnue'
+        )
+      )
     }
   }
 
-  /**
-   * Create a new book
-   */
   async store({ request, response }: HttpContext) {
     try {
       const {
@@ -72,25 +104,43 @@ export default class BooksController {
         idAuteur,
       }
 
-      const book = await Ouvrage.create(bookData)
-
-      return response.created({
-        success: true,
-        message: 'Book created successfully',
-        data: book,
-      })
+      try {
+        const book = await Ouvrage.create(bookData)
+        return response.created(this.formatSuccessResponse(book, 201, 'Livre créé avec succès'))
+      } catch (dbError) {
+        if (dbError instanceof Error && dbError.message.includes('unique')) {
+          return response.badRequest(
+            this.formatErrorResponse(400, 'Le livre existe déjà', 'E_BOOK_ALREADY_EXISTS')
+          )
+        }
+        throw dbError
+      }
     } catch (error) {
-      throw error
+      if (error instanceof ValidationException) {
+        return response.unprocessableEntity(
+          this.formatErrorResponse(422, 'Validation échouée', 'E_VALIDATION_ERROR', error.errors)
+        )
+      }
+
+      return response.internalServerError(
+        this.formatErrorResponse(
+          500,
+          'Erreur interne du serveur',
+          'E_INTERNAL_SERVER_ERROR',
+          error instanceof Error ? error.message : 'Erreur inconnue'
+        )
+      )
     }
   }
 
-  /**
-   * Update a book (full update)
-   */
   async update({ params, request, response }: HttpContext) {
     try {
       if (!params.id) {
-        throw new ValidationException('Book ID is required', { id: ['Book ID is required'] })
+        return response.badRequest(
+          this.formatErrorResponse(400, "L'ID du livre est requis", 'E_VALIDATION_ERROR', {
+            id: ["L'ID du livre est requis"],
+          })
+        )
       }
 
       const {
@@ -109,7 +159,7 @@ export default class BooksController {
       const book = await Ouvrage.find(params.id)
 
       if (!book) {
-        throw new NotFoundException('Book')
+        return response.notFound(this.formatErrorResponse(404, 'Livre non trouvé', 'E_NOT_FOUND'))
       }
 
       book.merge({
@@ -127,29 +177,39 @@ export default class BooksController {
 
       await book.save()
 
-      return response.ok({
-        success: true,
-        message: 'Book updated successfully',
-        data: book,
-      })
+      return response.ok(this.formatSuccessResponse(book, 200, 'Livre mis à jour avec succès'))
     } catch (error) {
-      throw error
+      if (error instanceof ValidationException) {
+        return response.unprocessableEntity(
+          this.formatErrorResponse(422, 'Validation échouée', 'E_VALIDATION_ERROR', error.errors)
+        )
+      }
+
+      return response.internalServerError(
+        this.formatErrorResponse(
+          500,
+          'Erreur interne du serveur',
+          'E_INTERNAL_SERVER_ERROR',
+          error instanceof Error ? error.message : 'Erreur inconnue'
+        )
+      )
     }
   }
 
-  /**
-   * Partial update a book
-   */
   async updatePartial({ request, params, response }: HttpContext) {
     try {
       if (!params.id) {
-        throw new ValidationException('Book ID is required', { id: ['Book ID is required'] })
+        return response.badRequest(
+          this.formatErrorResponse(400, "L'ID du livre est requis", 'E_VALIDATION_ERROR', {
+            id: ["L'ID du livre est requis"],
+          })
+        )
       }
 
       const book = await Ouvrage.find(params.id)
 
       if (!book) {
-        throw new NotFoundException('Book')
+        return response.notFound(this.formatErrorResponse(404, 'Livre non trouvé', 'E_NOT_FOUND'))
       }
 
       const {
@@ -165,7 +225,6 @@ export default class BooksController {
         idAuteur,
       } = await request.body()
 
-      // only update values changed by the user
       const updateData = {
         ...(titre !== undefined && { titre }),
         ...(anneeEdition !== undefined && { anneeEdition }),
@@ -182,39 +241,49 @@ export default class BooksController {
       book.merge(updateData)
       await book.save()
 
-      return response.ok({
-        success: true,
-        message: 'Book updated successfully',
-        data: book,
-      })
+      return response.ok(this.formatSuccessResponse(book, 200, 'Livre mis à jour avec succès'))
     } catch (error) {
-      throw error
+      return response.internalServerError(
+        this.formatErrorResponse(
+          500,
+          'Erreur interne du serveur',
+          'E_INTERNAL_SERVER_ERROR',
+          error instanceof Error ? error.message : 'Erreur inconnue'
+        )
+      )
     }
   }
 
-  /**
-   * Delete a book
-   */
   async destroy({ params, response }: HttpContext) {
     try {
       if (!params.id) {
-        throw new ValidationException('Book ID is required', { id: ['Book ID is required'] })
+        return response.badRequest(
+          this.formatErrorResponse(400, "L'ID du livre est requis", 'E_VALIDATION_ERROR', {
+            id: ["L'ID du livre est requis"],
+          })
+        )
       }
 
       const book = await Ouvrage.find(params.id)
 
       if (!book) {
-        throw new NotFoundException('Book')
+        return response.notFound(this.formatErrorResponse(404, 'Livre non trouvé', 'E_NOT_FOUND'))
       }
 
       await book.delete()
 
-      return response.ok({
-        success: true,
-        message: 'Book deleted successfully',
-      })
+      return response.ok(
+        this.formatSuccessResponse({ deleted: true }, 200, 'Livre supprimé avec succès')
+      )
     } catch (error) {
-      throw error
+      return response.internalServerError(
+        this.formatErrorResponse(
+          500,
+          'Erreur interne du serveur',
+          'E_INTERNAL_SERVER_ERROR',
+          error instanceof Error ? error.message : 'Erreur inconnue'
+        )
+      )
     }
   }
 }

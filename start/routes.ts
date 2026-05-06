@@ -16,12 +16,10 @@ const AutorsController = () => import('#controllers/autors_controller')
 import AutoSwagger from 'adonis-autoswagger'
 import swagger from '#config/swagger'
 
-// Swagger documentation endpoint
 router.get('/swagger', async () => {
   return AutoSwagger.default.docs(router.toJSON(), swagger)
 })
 
-// Swagger UI endpoint
 router.get('/docs', async () => {
   return AutoSwagger.default.ui('/swagger', swagger)
 })
@@ -57,10 +55,16 @@ router.group(() => {
 
   router.post('/api/book', [BooksController, 'store']).as('books.store').use(middleware.auth())
 
-  router.put('/api/book/:id', [BooksController, 'update']).as('books.updateComplete').use(middleware.auth())
+  router
+    .put('/api/book/:id', [BooksController, 'update'])
+    .as('books.updateComplete')
+    .use(middleware.auth())
   router.patch('/api/book/:id', [BooksController, 'updatePartial']).as('books.updatePartial')
 
-  router.delete('/api/book/:id', [BooksController, 'destroy']).as('books.destroy').use(middleware.auth())
+  router
+    .delete('/api/book/:id', [BooksController, 'destroy'])
+    .as('books.destroy')
+    .use(middleware.auth())
 })
 
 router.group(() => {
