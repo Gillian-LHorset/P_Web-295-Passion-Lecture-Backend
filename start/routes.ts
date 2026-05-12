@@ -8,6 +8,8 @@
 */
 const AuthController = () => import('#controllers/auth_controller')
 const BooksController = () => import('#controllers/books_controller')
+const CommentsController = () => import('#controllers/comments_controller')
+const RatingsController = () => import('#controllers/ratings_controller')
 import router from '@adonisjs/core/services/router'
 import { middleware } from '#start/kernel'
 const CategoriesController = () => import('#controllers/categories_controller')
@@ -73,10 +75,43 @@ router.group(() => {
 
   router.post('/api/autor', [AutorsController, 'store']).as('autor.store')
 
-  router.put('/api/autor/:id', [AutorsController, 'update']).as('autor.updateComplet')
-  router.patch('/api/autor/:id', [AutorsController, 'updatePartial']).as('autor.updatePartial')
+  router
+    .put('/api/autor/:id', [AutorsController, 'update'])
+    .as('autor.updateComplet')
+    .use(middleware.auth())
+  router
+    .patch('/api/autor/:id', [AutorsController, 'updatePartial'])
+    .as('autor.updatePartial')
+    .use(middleware.auth())
 
-  router.delete('/api/autor/:id', [AutorsController, 'destroy']).as('autor.destroy')
+  router
+    .delete('/api/autor/:id', [AutorsController, 'destroy'])
+    .as('autor.destroy')
+    .use(middleware.auth())
 })
 
 router.get('/api/categories', [CategoriesController, 'index']).as('category.index')
+
+router
+  .post('/api/book/:bookId/comment', [CommentsController, 'store'])
+  .as('comments.store')
+  .use(middleware.auth())
+
+router.get('/api/book/:bookId/comments', [CommentsController, 'getComments']).as('comments.list')
+
+router
+  .delete('/api/book/:bookId/comment', [CommentsController, 'destroy'])
+  .as('comments.destroy')
+  .use(middleware.auth())
+
+router
+  .post('/api/book/:bookId/rate', [RatingsController, 'store'])
+  .as('ratings.store')
+  .use(middleware.auth())
+
+router.get('/api/book/:bookId/ratings', [RatingsController, 'getRatings']).as('ratings.list')
+
+router
+  .delete('/api/book/:bookId/rate', [RatingsController, 'destroy'])
+  .as('ratings.destroy')
+  .use(middleware.auth())
