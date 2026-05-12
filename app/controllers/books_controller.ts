@@ -2,7 +2,7 @@ import Ouvrage from '#models/ouvrage'
 import type { HttpContext } from '@adonisjs/core/http'
 import { createBookValidator, updateBookValidator } from '#validators/book'
 import { ValidationException } from '#exceptions/api_exception'
-
+import Categorie from '#models/categorie'
 export default class BooksController {
   private formatErrorResponse(status: number, message: string, code: string, details?: any) {
     return {
@@ -75,7 +75,13 @@ export default class BooksController {
       )
     }
   }
-
+  async getByCategory({ params, response }: HttpContext) {
+    const category = await Categorie.query()
+      .where('id', params.id)
+      .preload('ouvrages')
+      .firstOrFail()
+    return response.ok(category)
+  }
   async store({ request, response }: HttpContext) {
     try {
       const {

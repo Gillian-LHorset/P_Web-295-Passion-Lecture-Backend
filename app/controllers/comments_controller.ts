@@ -92,8 +92,15 @@ export default class CommentsController {
 
       const comments = await book.related('commenters').query()
 
+      const formattedComments = comments.map((user) => ({
+        id: user.id,
+        pseudo: user.pseudo,
+        contenu: user.$extras.pivot_contenu,
+        createdAt: user.$extras.pivot_created_at,
+      }))
+
       return response.ok(
-        this.formatSuccessResponse(comments, 200, 'Commentaires récupérés avec succès')
+        this.formatSuccessResponse(formattedComments, 200, 'Commentaires récupérés avec succès')
       )
     } catch (error) {
       return response.internalServerError(

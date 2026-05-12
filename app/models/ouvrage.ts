@@ -52,6 +52,7 @@ export default class Ouvrage extends BaseModel {
     pivotForeignKey: 'Id_Ouvrage',
     pivotRelatedForeignKey: 'Id_Utilisateur',
     pivotColumns: ['contenu'],
+    pivotTimestamps: true,
   })
   declare commenters: ManyToMany<typeof Utilisateur>
 
@@ -60,6 +61,7 @@ export default class Ouvrage extends BaseModel {
     pivotForeignKey: 'Id_Ouvrage',
     pivotRelatedForeignKey: 'Id_Utilisateur',
     pivotColumns: ['note'],
+    pivotTimestamps: true,
   })
   declare likers: ManyToMany<typeof Utilisateur>
 }

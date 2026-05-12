@@ -92,6 +92,8 @@ router.group(() => {
 
 router.get('/api/categories', [CategoriesController, 'index']).as('category.index')
 
+router.get('/api/category/:id/books', [BooksController, 'getByCategory']).as('category.books')
+
 router
   .post('/api/book/:bookId/comment', [CommentsController, 'store'])
   .as('comments.store')

@@ -93,9 +93,9 @@ export default class RatingsController {
       const ratings = await book.related('likers').query()
 
       const formattedRatings = ratings.map((user) => ({
-  id: user.id,
-  paeudo: user.pseudo, // or whatever field you have
-  note: user.$extras.pivot_note, // Lucid prefixes pivot columns with pivot_
+        id: user.id,
+        pseudo: user.pseudo,
+        note: user.$extras.pivot_note,
       }))
 
       return response.ok(
