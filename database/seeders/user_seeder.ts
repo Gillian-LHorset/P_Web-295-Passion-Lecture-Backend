@@ -8,7 +8,7 @@ export default class extends BaseSeeder {
     if (count === 0) {
       await User.createMany([
         {
-          pseudo: 'Gilian',
+          pseudo: 'Gillian',
           password: '67',
         },
         {
@@ -18,6 +18,7 @@ export default class extends BaseSeeder {
         {
           pseudo: 'Jamal',
           password: '67',
+          isAdmin: true,
         },
       ])
     }

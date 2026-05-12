@@ -18,8 +18,10 @@ export default class User extends compose(BaseModel, AuthFinder) {
 
   @column()
   declare pseudo: string | null
+
   @column()
-  declare isAdmin: boolean | false
+  declare isAdmin: boolean
+
   @column({ serializeAs: null })
   declare password: string
 

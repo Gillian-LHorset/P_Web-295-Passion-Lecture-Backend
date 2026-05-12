@@ -9,7 +9,6 @@ export default class extends BaseSeeder {
     const users = await User.all()
     const categories = await Categorie.all()
     const auteurs = await Auteur.all()
-
     const count = await Ouvrage.query()
       .count('* as total')
       .then((res) => res[0].$extras.total)
