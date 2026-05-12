@@ -1,61 +1,41 @@
 # P_Web-295-Passion-Lecture-Backend
-
-## Routes
-
-Récupérer tous les livres
-
-```json
-/books
+## Lancer le projet
+### Prérequis
+Lancez le conteneur docker avec MySQL
+```sh
+docker-compose up -d
 ```
-
----
-
-Récupérer toutes les infos d'un livre
-
-```json
-/book/:id
+### Initialisation
+1. Copiez l'exemple de .env.example dans .env
+   ```sh
+   cp .env.example .env
+   ```
+2. Générez le clé pour l'app
+   ```sh
+   node ace generate:key
+   ```
+3. Installez les dépendances
+  ```sh
+  npm install
+   ```
+4. Lancez le build
+    ```sh
+   npm run build
+   ```
+5. Allez dans le dossier build
+```sh
+  cd build
 ```
-
----
-
-Ajouter un livre  
-Prends en entré au format JSON :
-
-- titre: string de longeur de 1 à 255
-- anneeEdition: number de minimum 1000 et maximum la date acctuel
-- imageUrl: string de longeur maximum de 255 (optionel) //TODO : changer pour blob
-- nombrePages: number de minimum 1
-- extrait: string
-- resume: string()
-- idUtilisateur: number()
-- idCategorie: number()
-- idEditeur: number()
-- idAuteur: number()
-
-```json
-/add-book
-```
-
----
-
-Remplacer l'intégralité du contenu d'un livre dans la base de données
-
-```json
-/put-book/:id
-```
-
----
-
-Replacer uniquement une partie du contenu d'un livre dans la base de données
-
-```json
-/patch-book/:id
-```
-
----
-
-Supprimer un livre
-
-```json
-/delete-book/:id
-```
+6. Installez les dépendances
+   ```sh
+   npm ci --omit="dev"
+   ```
+7. Lancez le serveur
+    ```sh
+   node bin/server.js
+   ```
+8. Faites une migration et seed de la base de données
+     ```sh
+   node ace migration:fresh  --seed
+   ```
+Votre API est prête à être utilisée
