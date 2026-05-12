@@ -113,6 +113,62 @@ export default class RatingsController {
     }
   }
 
+  async update({ auth, params, request, response }: HttpContext) {
+    try {
+      if (!auth.user) {
+        return response.unauthorized(
+          this.formatErrorResponse(401, 'Authentification requise', 'E_UNAUTHORIZED')
+        )
+      }
+
+      if (!params.bookId) {
+        return response.badRequest(
+          this.formatErrorResponse(400, "L'ID du livre est requis", 'E_VALIDATION_ERROR', {
+            bookId: ["L'ID du livre est requis"],
+          })
+        )
+      }
+
+      const book = await Ouvrage.find(params.bookId)
+      if (!book) {
+        return response.notFound(this.formatErrorResponse(404, 'Livre non trouvé', 'E_NOT_FOUND'))
+      }
+
+      const { note } = await request.validateUsing(createRatingValidator)
+
+      const updated = (await book.related('likers').pivotQuery().where('Id_Utilisateur', auth.user.id).update({ note })) as any
+
+      if (updated === 0 || (Array.isArray(updated) && updated.length === 0)) {
+        return response.notFound(
+          this.formatErrorResponse(404, 'Évaluation non trouvée pour cet utilisateur', 'E_NOT_FOUND')
+        )
+      }
+
+      return response.ok(
+        this.formatSuccessResponse(
+          { userId: auth.user.id, note },
+          200,
+          'Évaluation mise à jour avec succès'
+        )
+      )
+    } catch (error) {
+      if (error instanceof ValidationException) {
+        return response.unprocessableEntity(
+          this.formatErrorResponse(422, 'Validation échouée', 'E_VALIDATION_ERROR', error.errors)
+        )
+      }
+
+      return response.internalServerError(
+        this.formatErrorResponse(
+          500,
+          'Erreur interne du serveur',
+          'E_INTERNAL_SERVER_ERROR',
+          error instanceof Error ? error.message : 'Erreur inconnue'
+        )
+      )
+    }
+  }
+
   async destroy({ auth, params, response }: HttpContext) {
     try {
       if (!auth.user) {

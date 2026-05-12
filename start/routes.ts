@@ -102,6 +102,11 @@ router
 router.get('/api/book/:bookId/comments', [CommentsController, 'getComments']).as('comments.list')
 
 router
+  .put('/api/book/:bookId/comment', [CommentsController, 'update'])
+  .as('comments.update')
+  .use(middleware.auth())
+
+router
   .delete('/api/book/:bookId/comment', [CommentsController, 'destroy'])
   .as('comments.destroy')
   .use(middleware.auth())
@@ -112,6 +117,11 @@ router
   .use(middleware.auth())
 
 router.get('/api/book/:bookId/ratings', [RatingsController, 'getRatings']).as('ratings.list')
+
+router
+  .put('/api/book/:bookId/rate', [RatingsController, 'update'])
+  .as('ratings.update')
+  .use(middleware.auth())
 
 router
   .delete('/api/book/:bookId/rate', [RatingsController, 'destroy'])
