@@ -1,43 +1,33 @@
-import { BaseSchema } from '@adonisjs/lucid/schema'
+import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
+import type { BelongsTo } from '@adonisjs/lucid/types/relations'
+import { DateTime } from 'luxon'
+import Ouvrage from '#models/ouvrage'
+import User from '#models/user'
 
-export default class extends BaseSchema {
-  protected tableName = 'apprecier'
+export default class Apprecier extends BaseModel {
+  public static table = 'apprecier'
 
-  async up() {
-    this.schema.createTable(this.tableName, (table) => {
-      table.increments('id')
+  @column({ isPrimary: true, columnName: 'id' })
+  declare id: number
 
-      table
-        .integer('Id_Ouvrage')
-        .unsigned()
-        .references('id')
-        .inTable('ouvrages')
-        .onDelete('CASCADE')
-        .notNullable()
+  @column()
+  declare note: number
 
-      table
-        .integer('Id_Utilisateur')
-        .unsigned()
-        .references('id')
-        .inTable('users')
-        .onDelete('CASCADE')
-        .notNullable()
+  @column({ columnName: 'Id_Ouvrage' })
+  declare idOuvrage: number
 
-      // The Rating value
-      table.integer('note').notNullable()
+  @column({ columnName: 'Id_Utilisateur' })
+  declare idUtilisateur: number
 
-      /**
-       * Optional: Prevent a user from rating the same book twice
-       * (Already handled by .sync() in your controller, but good for DB integrity)
-       */
-      table.unique(['Id_Ouvrage', 'Id_Utilisateur'])
+  @column.dateTime({ autoCreate: true, columnName: 'created_at' })
+  declare createdAt: DateTime
 
-      table.timestamp('created_at')
-      table.timestamp('updated_at')
-    })
-  }
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updated_at' })
+  declare updatedAt: DateTime
 
-  async down() {
-    this.schema.dropTable(this.tableName)
-  }
+  @belongsTo(() => Ouvrage, { foreignKey: 'idOuvrage' })
+  declare ouvrage: BelongsTo<typeof Ouvrage>
+
+  @belongsTo(() => User, { foreignKey: 'idUtilisateur' })
+  declare utilisateur: BelongsTo<typeof User>
 }

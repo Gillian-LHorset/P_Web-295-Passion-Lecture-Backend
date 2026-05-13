@@ -1,4 +1,5 @@
 import Ouvrage from '#models/ouvrage'
+import Apprecier from '#models/apprecier'
 import type { HttpContext } from '@adonisjs/core/http'
 import { createRatingValidator } from '#validators/rating'
 import { ValidationException } from '#exceptions/api_exception'
@@ -21,6 +22,16 @@ export default class RatingsController {
       message,
       data,
     }
+  }
+
+  private async getAverageRating(bookId: number): Promise<number> {
+    const result = await Apprecier.query()
+      .where('Id_Ouvrage', bookId)
+      .avg('note as average')
+      .first()
+
+    const avg = result?.$extras.average
+    return avg ? Number(parseFloat(avg).toFixed(1)) : 0
   }
 
   async store({ auth, params, request, response }: HttpContext) {
@@ -48,11 +59,13 @@ export default class RatingsController {
 
       await book.related('likers').sync({
         [auth.user.id]: { note },
-      })
+      }, false)
+
+      const averageRating = await this.getAverageRating(book.id)
 
       return response.created(
         this.formatSuccessResponse(
-          { userId: auth.user.id, note },
+          { userId: auth.user.id, note, averageRating },
           201,
           'Évaluation ajoutée avec succès'
         )
@@ -166,9 +179,11 @@ export default class RatingsController {
         )
       }
 
+      const averageRating = await this.getAverageRating(book.id)
+
       return response.ok(
         this.formatSuccessResponse(
-          { userId: auth.user.id, note },
+          { userId: auth.user.id, note, averageRating },
           200,
           'Évaluation mise à jour avec succès'
         )
@@ -228,8 +243,10 @@ export default class RatingsController {
 
       await book.related('likers').detach([auth.user.id])
 
+      const averageRating = await this.getAverageRating(book.id)
+
       return response.ok(
-        this.formatSuccessResponse({ deleted: true }, 200, 'Évaluation supprimée avec succès')
+        this.formatSuccessResponse({ deleted: true, averageRating }, 200, 'Évaluation supprimée avec succès')
       )
     } catch (error) {
       return response.internalServerError(

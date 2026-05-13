@@ -1,5 +1,6 @@
 import { BaseModel, column, belongsTo, manyToMany } from '@adonisjs/lucid/orm'
 import type { BelongsTo, ManyToMany } from '@adonisjs/lucid/types/relations'
+import { DateTime } from 'luxon'
 import Utilisateur from '#models/user'
 import Categorie from '#models/categorie'
 import Auteur from '#models/auteur'
@@ -38,6 +39,12 @@ export default class Ouvrage extends BaseModel {
   @column({ columnName: 'Id_auteur' })
   declare idAuteur: number
 
+   @column.dateTime({ autoCreate: true, columnName: 'created_at' })
+    declare createdAt: DateTime
+  
+    @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updated_at' })
+  declare updatedAt: DateTime
+  
   @belongsTo(() => Utilisateur, { foreignKey: 'idUtilisateur' })
   declare user: BelongsTo<typeof Utilisateur>
 
