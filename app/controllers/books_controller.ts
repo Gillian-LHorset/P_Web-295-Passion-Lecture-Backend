@@ -3,6 +3,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { createBookValidator, updateBookValidator } from '#validators/book'
 import { ValidationException } from '#exceptions/api_exception'
 import Categorie from '#models/categorie'
+
 export default class BooksController {
   private formatErrorResponse(status: number, message: string, code: string, details?: any) {
     return {
@@ -82,6 +83,7 @@ export default class BooksController {
       .firstOrFail()
     return response.ok(category)
   }
+
   async store({ request, response }: HttpContext) {
     try {
       const {
@@ -110,8 +112,8 @@ export default class BooksController {
         idAuteur,
       }
 
+      const book = await Ouvrage.create(bookData)
       try {
-        const book = await Ouvrage.create(bookData)
         return response.created(this.formatSuccessResponse(book, 201, 'Livre créé avec succès'))
       } catch (dbError) {
         if (dbError instanceof Error && dbError.message.includes('unique')) {
@@ -139,12 +141,22 @@ export default class BooksController {
     }
   }
 
-  async update({ params, request, response }: HttpContext) {
+  async update({ params, request, response, auth }: HttpContext) {
     try {
       if (!params.id) {
         return response.badRequest(
           this.formatErrorResponse(400, "L'ID du livre est requis", 'E_VALIDATION_ERROR', {
             id: ["L'ID du livre est requis"],
+          })
+        )
+      }
+
+      const book = await Ouvrage.find(params.id)
+
+      if (!auth.user?.isAdmin && book?.idUtilisateur != auth.user?.id) {
+        return response.badRequest(
+          this.formatErrorResponse(403, 'Accès non autorisé', 'E_FORBIDDEN', {
+            id: ["Vous n'êtes pas autorisé à accéder à cette ressource"],
           })
         )
       }
@@ -161,8 +173,6 @@ export default class BooksController {
         idCategorie,
         idAuteur,
       } = await request.validateUsing(updateBookValidator)
-
-      const book = await Ouvrage.find(params.id)
 
       if (!book) {
         return response.notFound(this.formatErrorResponse(404, 'Livre non trouvé', 'E_NOT_FOUND'))
@@ -202,7 +212,7 @@ export default class BooksController {
     }
   }
 
-  async updatePartial({ request, params, response }: HttpContext) {
+  async updatePartial({ request, params, response, auth }: HttpContext) {
     try {
       if (!params.id) {
         return response.badRequest(
@@ -216,6 +226,14 @@ export default class BooksController {
 
       if (!book) {
         return response.notFound(this.formatErrorResponse(404, 'Livre non trouvé', 'E_NOT_FOUND'))
+      }
+
+      if (!auth.user?.isAdmin && book?.idUtilisateur != auth.user?.id) {
+        return response.badRequest(
+          this.formatErrorResponse(403, 'Accès non autorisé', 'E_FORBIDDEN', {
+            id: ["Vous n'êtes pas autorisé à accéder à cette ressource"],
+          })
+        )
       }
 
       const {
@@ -260,7 +278,7 @@ export default class BooksController {
     }
   }
 
-  async destroy({ params, response }: HttpContext) {
+  async destroy({ params, response, auth }: HttpContext) {
     try {
       if (!params.id) {
         return response.badRequest(
@@ -271,6 +289,14 @@ export default class BooksController {
       }
 
       const book = await Ouvrage.find(params.id)
+
+      if (!auth.user?.isAdmin && book?.idUtilisateur != auth.user?.id) {
+        return response.badRequest(
+          this.formatErrorResponse(403, 'Accès non autorisé', 'E_FORBIDDEN', {
+            id: ["Vous n'êtes pas autorisé à accéder à cette ressource"],
+          })
+        )
+      }
 
       if (!book) {
         return response.notFound(this.formatErrorResponse(404, 'Livre non trouvé', 'E_NOT_FOUND'))

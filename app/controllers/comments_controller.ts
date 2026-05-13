@@ -137,11 +137,33 @@ export default class CommentsController {
 
       const { contenu } = await request.validateUsing(createCommentValidator)
 
-      const updated = (await book.related('commenters').pivotQuery().where('Id_Utilisateur', auth.user.id).update({ contenu })) as any
+      const commentaire = await book
+        .related('commenters')
+        .pivotQuery()
+        .where('Id_Utilisateur', auth.user.id)
+        .first()
+
+      if (!auth.user?.isAdmin && commentaire?.idUtilisateur != auth.user?.id) {
+        return response.badRequest(
+          this.formatErrorResponse(403, 'Accès non autorisé', 'E_FORBIDDEN', {
+            id: ["Vous n'êtes pas autorisé à accéder à cette ressource"],
+          })
+        )
+      }
+
+      const updated = (await book
+        .related('commenters')
+        .pivotQuery()
+        .where('Id_Utilisateur', auth.user.id)
+        .update({ contenu })) as any
 
       if (updated === 0 || (Array.isArray(updated) && updated.length === 0)) {
         return response.notFound(
-          this.formatErrorResponse(404, 'Commentaire non trouvé pour cet utilisateur', 'E_NOT_FOUND')
+          this.formatErrorResponse(
+            404,
+            'Commentaire non trouvé pour cet utilisateur',
+            'E_NOT_FOUND'
+          )
         )
       }
 
@@ -191,7 +213,21 @@ export default class CommentsController {
         return response.notFound(this.formatErrorResponse(404, 'Livre non trouvé', 'E_NOT_FOUND'))
       }
 
-      await book.related('commenters').detach([auth.user.id])
+      const commentaire = await book
+        .related('commenters')
+        .pivotQuery()
+        .where('Id_Utilisateur', auth.user.id)
+        .first()
+
+      if (!auth.user?.isAdmin && commentaire?.idUtilisateur != auth.user?.id) {
+        return response.badRequest(
+          this.formatErrorResponse(403, 'Accès non autorisé', 'E_FORBIDDEN', {
+            id: ["Vous n'êtes pas autorisé à accéder à cette ressource"],
+          })
+        )
+      }
+
+      await book.related('commenters').pivotQuery().where('Id_Utilisateur', auth.user.id).delete()
 
       return response.ok(
         this.formatSuccessResponse({ deleted: true }, 200, 'Commentaire supprimé avec succès')

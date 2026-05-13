@@ -134,13 +134,35 @@ export default class RatingsController {
         return response.notFound(this.formatErrorResponse(404, 'Livre non trouvé', 'E_NOT_FOUND'))
       }
 
+      const rating = await book
+        .related('likers')
+        .pivotQuery()
+        .where('Id_Utilisateur', auth.user.id)
+        .first()
+
+      if (!auth.user?.isAdmin && rating?.Id_Utilisateur != auth.user?.id) {
+        return response.badRequest(
+          this.formatErrorResponse(403, 'Accès non autorisé', 'E_FORBIDDEN', {
+            id: ["Vous n'êtes pas autorisé à accéder à cette ressource"],
+          })
+        )
+      }
+
       const { note } = await request.validateUsing(createRatingValidator)
 
-      const updated = (await book.related('likers').pivotQuery().where('Id_Utilisateur', auth.user.id).update({ note })) as any
+      const updated = (await book
+        .related('likers')
+        .pivotQuery()
+        .where('Id_Utilisateur', auth.user.id)
+        .update({ note })) as any
 
       if (updated === 0 || (Array.isArray(updated) && updated.length === 0)) {
         return response.notFound(
-          this.formatErrorResponse(404, 'Évaluation non trouvée pour cet utilisateur', 'E_NOT_FOUND')
+          this.formatErrorResponse(
+            404,
+            'Évaluation non trouvée pour cet utilisateur',
+            'E_NOT_FOUND'
+          )
         )
       }
 
@@ -188,6 +210,20 @@ export default class RatingsController {
       const book = await Ouvrage.find(params.bookId)
       if (!book) {
         return response.notFound(this.formatErrorResponse(404, 'Livre non trouvé', 'E_NOT_FOUND'))
+      }
+
+      const rating = await book
+        .related('likers')
+        .pivotQuery()
+        .where('Id_Utilisateur', auth.user.id)
+        .first()
+
+      if (!auth.user?.isAdmin && rating?.Id_Utilisateur != auth.user?.id) {
+        return response.badRequest(
+          this.formatErrorResponse(403, 'Accès non autorisé', 'E_FORBIDDEN', {
+            id: ["Vous n'êtes pas autorisé à accéder à cette ressource"],
+          })
+        )
       }
 
       await book.related('likers').detach([auth.user.id])

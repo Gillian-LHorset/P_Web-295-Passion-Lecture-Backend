@@ -40,7 +40,7 @@ export default class AuthController {
       try {
         const user = await User.verifyCredentials(pseudo, password)
         const token = await User.accessTokens.create(user, user.isAdmin ? ['admin'] : ['user'])
-        console.log(token)
+
         return response.ok(
           this.formatSuccessResponse(
             {

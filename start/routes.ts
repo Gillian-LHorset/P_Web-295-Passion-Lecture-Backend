@@ -55,7 +55,10 @@ router.group(() => {
 
   router.get('/api/book/:id', [BooksController, 'show']).as('books.show')
 
-  router.post('/api/book', [BooksController, 'store']).as('books.store').use(middleware.auth())
+  router
+    .post('/api/book', [BooksController, 'store'])
+    .as('books.store')
+    .use(middleware.auth({ guards: ['api'] }))
 
   router
     .put('/api/book/:id', [BooksController, 'update'])
