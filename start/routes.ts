@@ -100,7 +100,7 @@ router
   .use(middleware.auth())
 
 router.get('/api/book/:bookId/comments', [CommentsController, 'getComments']).as('comments.list')
-
+router.get('/api/books/five-last', [BooksController, 'getFiveLastBooks']).as('books.fiveLast')
 router
   .put('/api/book/:bookId/comment', [CommentsController, 'update'])
   .as('comments.update')
