@@ -31,7 +31,7 @@ export default class RatingsController {
       .first()
 
     const avg = result?.$extras.average
-    return avg ? Number(parseFloat(avg).toFixed(1)) : 0
+    return avg ? Number(Number.parseFloat(avg).toFixed(1)) : 0
   }
 
   async store({ auth, params, request, response }: HttpContext) {
@@ -57,9 +57,12 @@ export default class RatingsController {
 
       const { note } = await request.validateUsing(createRatingValidator)
 
-      await book.related('likers').sync({
-        [auth.user.id]: { note },
-      }, false)
+      await book.related('likers').sync(
+        {
+          [auth.user.id]: { note },
+        },
+        false
+      )
 
       const averageRating = await this.getAverageRating(book.id)
 
@@ -246,7 +249,11 @@ export default class RatingsController {
       const averageRating = await this.getAverageRating(book.id)
 
       return response.ok(
-        this.formatSuccessResponse({ deleted: true, averageRating }, 200, 'Évaluation supprimée avec succès')
+        this.formatSuccessResponse(
+          { deleted: true, averageRating },
+          200,
+          'Évaluation supprimée avec succès'
+        )
       )
     } catch (error) {
       return response.internalServerError(

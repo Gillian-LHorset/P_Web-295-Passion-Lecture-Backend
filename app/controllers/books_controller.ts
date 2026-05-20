@@ -83,18 +83,35 @@ export default class BooksController {
         .preload('ouvrages')
         .firstOrFail()
       return response.ok(category)
-    }
-    catch (error){
-      return response.internalServerError(this.formatErrorResponse(500, 'Erreur interne du serveur', 'E_INTERNAL_SERVER_ERROR', error instanceof Error ? error.message : 'Erreur inconnue'))  
+    } catch (error) {
+      return response.internalServerError(
+        this.formatErrorResponse(
+          500,
+          'Erreur interne du serveur',
+          'E_INTERNAL_SERVER_ERROR',
+          error instanceof Error ? error.message : 'Erreur inconnue'
+        )
+      )
     }
   }
   async getFiveLastBooks({ response }: HttpContext) {
     try {
-      const lastBooks = await Ouvrage.query().limit(5).orderBy('created_at', 'desc').preload('user').preload('categorie').preload('auteur')
+      const lastBooks = await Ouvrage.query()
+        .limit(5)
+        .orderBy('created_at', 'desc')
+        .preload('user')
+        .preload('categorie')
+        .preload('auteur')
       return response.ok(lastBooks)
-    }
-    catch (error) {
-      return response.internalServerError(this.formatErrorResponse(500, 'Erreur interne du serveur', 'E_INTERNAL_SERVER_ERROR', error instanceof Error ? error.message : 'Erreur inconnue'))  
+    } catch (error) {
+      return response.internalServerError(
+        this.formatErrorResponse(
+          500,
+          'Erreur interne du serveur',
+          'E_INTERNAL_SERVER_ERROR',
+          error instanceof Error ? error.message : 'Erreur inconnue'
+        )
+      )
     }
   }
 
